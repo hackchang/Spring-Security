@@ -1,5 +1,9 @@
 package com.haechang.security1.config;
+// 구글 로그인 후 처리 필요함. 
+// kakao - 1. 코드받기(인중) 2. 액세스토큰(권한) 3. 프로필정보 가져옴 4. 자동회원가입
+// 4-2. 정보가 추가적으로 필요할 때 더 추가해야됨.
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -7,6 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.haechang.security1.config.oauth.PrincipalOauth2UserService;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 필터(Security Config)가 스프링 필터체인에 등록
@@ -19,6 +25,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	public BCryptPasswordEncoder encodePwd() {
 		return new BCryptPasswordEncoder();
 	}
+	
+	@Autowired
+	private PrincipalOauth2UserService principalOauth2UserService;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -35,7 +44,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			.defaultSuccessUrl("/")
 			.and()
 			.oauth2Login()
-			.loginPage("/loginForm");
+			.loginPage("/loginForm")
+			.userInfoEndpoint()
+			.userService(principalOauth2UserService); // Tip. 코드 안받고, 액세스 토큰+사용자 프로필정보 받음.
+		
 	}
 	
 }
